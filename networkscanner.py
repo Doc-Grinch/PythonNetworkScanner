@@ -102,7 +102,7 @@ def get_ports(mode):
         for port in range(1, 49152):
             QUEUE.put(port)
     elif mode == 3:
-        ports = [20, 21, 22, 23, 25, 53, 80, 110, 443]
+        ports = [20, 21, 22, 23, 25, 53, 80, 110, 389, 443, 3389]
         for port in ports:
             QUEUE.put(port)
 
@@ -147,4 +147,18 @@ def run_scanner_port(threads, mode):
     writefile(str(OPEN_PORTS), "result_ports.txt")
 
 
-handle()
+def banner(ip, port):
+    for ports in port:
+        s = socket.socket()
+        s.connect((ip, ports))
+        s.settimeout(2)
+        try:
+            print(s.recv(1024))
+        except:
+            print("No banner found for port " + str(ports))
+
+
+# handle()
+choose_ip()
+run_scanner_port(800, 3)
+banner(TARGET_IP, OPEN_PORTS)
