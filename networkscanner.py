@@ -2,7 +2,7 @@
 # Network vulnerability scanner with threads
 # Written by Arthur D, Simon D and Kevin D
 
-from sys import argv, stderr
+from sys import stderr
 from queue import Queue
 import socket
 import threading
@@ -15,11 +15,12 @@ OPEN_PORTS = []
 
 # Main function
 def handle():
+    writefile(ipconfig_infos(), "configs.txt")
     host = choose_network()
     network = ipaddress.ip_network(host, False)
-    ping(network)
+    get_ip(network)
     choose_ip()
-    run_scanner(800, 1)
+    run_scanner_port(800, 3)
 
 
 # Function that displays the ip addresses found and ask for the selection
@@ -35,12 +36,12 @@ def choose_ip():
     ip = read_ips()
     print(ip)
     choose = int(input("Please choose the ip to scan from 0 to " + str((len(ip)) - 1) + "\n"))
-    global TARGET
-    TARGET = ip[choose]
+    global TARGET_IP
+    TARGET_IP = ip[choose]
 
 
 # Get ipconfig information
-def win_int_infos():
+def ipconfig_infos():
     interfaces = getoutput("ipconfig")
     interfaces.encode("utf-8")
     return interfaces
@@ -52,11 +53,11 @@ def writefile(texttowrite, file):
         with open(file, "w") as fw:
             fw.writelines(texttowrite)
     except PermissionError as e:
-        print(e)
+        print("Cannot write to the file", e, file=stderr)
         exit(1)
 
 
-# Read the IP of the file
+# Read the IPs of the file
 def readfile():
     try:
         with open("configs.txt", "r") as fr:
@@ -69,7 +70,7 @@ def readfile():
                     allIps[-1] = allIps[-1] + "/" + ips[-1]
             return allIps
     except PermissionError as e:
-        print(e)
+        print("Cannot read the result IP file", e, file=stderr)
         exit(1)
 
 
@@ -80,32 +81,14 @@ def read_ips():
         text_file.close()
         return lines
     except PermissionError as e:
-        print(e)
+        print("Cannot read result IPs file.", e, file=stderr)
         exit(1)
 
 
-# Ping with Windows parameters
-def ping(network):
-    try:
-        result_file = open("result_ip.txt", "w")
-    except PermissionError as e:
-        print("Cannot open result file.", e, file=stderr)
-        exit(1)
-    for host in network.hosts():
-        response = run(f"ping -n 1 -w 500 {host.exploded}", stdout=PIPE)
-        if response.returncode == 0:
-            print("Found" + host.exploded)
-            result_file.write(host.exploded + "\n")
-    result_file.close()
-
-
-choose_network()
-
-
-def portscan(port):
+def port_scan(port):
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.connect((TARGET, port))
+        sock.connect((TARGET_IP, port))
         return True
     except:
         return False
@@ -124,15 +107,30 @@ def get_ports(mode):
             QUEUE.put(port)
 
 
+# Ping with Windows parameters
+def get_ip(network):
+    try:
+        result_file = open("result_ip.txt", "w")
+    except PermissionError as e:
+        print("Cannot open result IPs file.", e, file=stderr)
+        exit(1)
+    for host in network.hosts():
+        response = run(f"ping -n 1 -w 500 {host.exploded}", stdout=PIPE)
+        if response.returncode == 0:
+            print("IP {} is reachable!".format(host))
+            result_file.write(host.exploded + "\n")
+    result_file.close()
+
+
 def worker():
     while not QUEUE.empty():
         port = QUEUE.get()
-        if portscan(port):
+        if port_scan(port):
             print("Port {} is open!".format(port))
             OPEN_PORTS.append(port)
 
 
-def run_scanner(threads, mode):
+def run_scanner_port(threads, mode):
     get_ports(mode)
     thread_list = []
     for t in range(threads):
@@ -146,6 +144,7 @@ def run_scanner(threads, mode):
         thread.join()
 
     print("Open ports are:", OPEN_PORTS)
+    writefile(str(OPEN_PORTS), "result_ports.txt")
 
 
 handle()
