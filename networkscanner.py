@@ -126,7 +126,9 @@ def worker():
     while not QUEUE.empty():
         port = QUEUE.get()
         if port_scan(port):
+            serviceName = socket.getservbyport(port, "tcp")
             print("Port {} is open!".format(port))
+            print("Name of the service running at port number %d : %s" % (port, serviceName))
             OPEN_PORTS.append(port)
 
 
