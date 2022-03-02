@@ -8,6 +8,8 @@ import socket
 import threading
 import ipaddress
 from subprocess import run, getoutput, PIPE
+import json
+import nmap
 
 QUEUE = Queue()
 OPEN_PORTS = []
@@ -150,14 +152,25 @@ def run_scanner_port(threads, mode):
 
 
 def banner(ip, port):
+
     for ports in port:
-        s = socket.socket()
-        s.connect((ip, ports))
-        s.settimeout(2)
-        try:
-            print(s.recv(1024))
-        except:
-            print("No banner found for port " + str(ports))
+        dic = nmap.PortScanner.scan(ip, port)
+        res = json.dumps(dic)
+        jres = json.loads(res)
+
+        product = jres["scan"][str(ip)]["tcp"][str(ports)]["product"]
+        version = jres["scan"][str(ip)]["tcp"][str(ports)]["version"]
+
+        print(product + " " + version)
+
+    # for ports in port:
+    #     s = socket.socket()
+    #     s.connect((ip, ports))
+    #     s.settimeout(2)
+    #     try:
+    #         print(s.recv(1024))
+    #     except:
+    #         print("No banner found for port " + str(ports))
 
 
 # handle()
