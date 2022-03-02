@@ -152,9 +152,11 @@ def run_scanner_port(threads, mode):
 
 
 def banner(ip, port):
-
+    #print(ip, port)
+    ns = nmap.PortScanner()
     for ports in port:
-        dic = nmap.PortScanner.scan(ip, port)
+        #print(ports, type(ports))
+        dic = ns.scan(str(ip), str(ports))
         res = json.dumps(dic)
         jres = json.loads(res)
 
