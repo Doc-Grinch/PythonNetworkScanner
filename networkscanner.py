@@ -44,7 +44,7 @@ def choose_ip():
 
 # Get ipconfig information
 def ipconfig_infos():
-    interfaces = getoutput("ipconfig")
+    interfaces = getoutput("ip r")
     interfaces.encode("utf-8")
     return interfaces
 
@@ -63,14 +63,27 @@ def writefile(texttowrite, file):
 def readfile():
     try:
         with open("configs.txt", "r") as fr:
-            allIps = []
-            for i in fr.readlines():
-                ips = i.strip().split(" ")
-                if "IPv4." in ips or "IPv4" in ips:
-                    allIps.append(ips[-1])
-                if "Masque" in ips or "Mask" in ips:
-                    allIps[-1] = allIps[-1] + "/" + ips[-1]
-            return allIps
+            lines = fr.readlines()
+            for i, line in enumerate(lines):
+                string = line.split(" ")
+                if (i == 0):
+                    print(f"Mode: {string[6]}")
+                try:
+                    print(f"Interface:  {string[2]}\n\
+                        Reseau/Masque:  {string[0]}\n\
+                        Adresse IP:  {string[8]}\n")
+                except IndexError:
+                    continue
+            # TODO: ADD THE IP IN THE ALLIPS VAR
+            print("debbuging linux => finding the way to only get ip addresses")
+            # allIps = []
+            # for i in fr.readlines():
+            #     ips = i.strip().split(" ")
+            #     if "IPv4." in ips or "IPv4" in ips:
+            #         allIps.append(ips[-1])
+            #     if "Masque" in ips or "Mask" in ips:
+            #         allIps[-1] = allIps[-1] + "/" + ips[-1]
+            # return allIps
     except PermissionError as e:
         print("Cannot read the result IP file", e, file=stderr)
         exit(1)
