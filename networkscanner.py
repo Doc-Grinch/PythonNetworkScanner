@@ -66,7 +66,7 @@ def readfile():
             lines = fr.readlines()
             for i, line in enumerate(lines):
                 string = line.split(" ")
-                if (i == 0):
+                if i == 0:
                     print(f"Mode: {string[6]}")
                 try:
                     print(f"Interface:  {string[2]}\n\
@@ -130,7 +130,7 @@ def get_ip(network):
         print("Cannot open result IPs file.", e, file=stderr)
         exit(1)
     for host in network.hosts():
-        response = run(f"ping -n 1 -w 500 {host.exploded}", stdout=PIPE)
+        response = run(f"ping -c 1 -W 1 {host.exploded}", stdout=PIPE)
         if response.returncode == 0:
             print("IP {} is reachable!".format(host))
             result_file.write(host.exploded + "\n")
