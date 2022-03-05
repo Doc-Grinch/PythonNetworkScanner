@@ -12,6 +12,7 @@ import ipaddress
 from subprocess import run, getoutput, PIPE
 import json
 import nmap
+import nvdlib as nvdlib
 
 QUEUE = Queue()
 OPEN_PORTS = []
@@ -165,6 +166,11 @@ def run_scanner_port(threads, mode):
     print("Open ports are:", OPEN_PORTS)
     writefile(str(OPEN_PORTS), "result_ports.txt")
 
+def nvd_search(search):
+    r = nvdlib.searchCVE(keyword=search, cvssV3Severity="CRITICAL", limit=10)
+    for eachCVE in r:
+        print(eachCVE.cve +" "+ eachCVE.url)
+        
 
 def banner(ip, port):
     #print(ip, port)
@@ -179,6 +185,7 @@ def banner(ip, port):
         version = jres["scan"][str(ip)]["tcp"][str(ports)]["version"]
 
         print(product + " " + version)
+        nvd_search(product)
 
     # for ports in port:
     #     s = socket.socket()
@@ -190,7 +197,11 @@ def banner(ip, port):
     #         print("No banner found for port " + str(ports))
 
 
+
 # handle()
 choose_ip()
 run_scanner_port(800, 3)
+#TARGET_IP="178.33.235.93"
+#OPEN_PORTS=[20, 21, 22, 23, 25, 53, 80, 110, 389, 443, 3389]
 banner(TARGET_IP, OPEN_PORTS)
+
