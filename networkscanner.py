@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # -*- coding:utf-8 -*-
 # Network vulnerability scanner with threads
 # Written by Arthur D, Simon D and Kevin D
