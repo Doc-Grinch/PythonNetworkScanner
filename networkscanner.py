@@ -169,7 +169,7 @@ def run_scanner_port(threads, mode):
 def nvd_search(search):
     r = nvdlib.searchCVE(keyword=search, cvssV3Severity="CRITICAL", limit=10)
     for eachCVE in r:
-        print(eachCVE.cve +" "+ eachCVE.url)
+        print(eachCVE.cve)
         
 
 def banner(ip, port):
