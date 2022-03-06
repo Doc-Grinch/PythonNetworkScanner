@@ -77,16 +77,6 @@ def readfile():
                         Adresse IP:  {string[8]}\n")
                 except IndexError:
                     continue
-            # TODO: ADD THE IP IN THE ALLIPS VAR
-            print("debbuging linux => finding the way to only get ip addresses")
-            # allIps = []
-            # for i in fr.readlines():
-            #     ips = i.strip().split(" ")
-            #     if "IPv4." in ips or "IPv4" in ips:
-            #         allIps.append(ips[-1])
-            #     if "Masque" in ips or "Mask" in ips:
-            #         allIps[-1] = allIps[-1] + "/" + ips[-1]
-            # return allIps
     except PermissionError as e:
         print("Cannot read the result IP file", e, file=stderr)
         exit(1)
@@ -168,15 +158,15 @@ def run_scanner_port(threads, mode):
 
 def nvd_search(search):
     r = nvdlib.searchCVE(keyword=search, cvssV3Severity="CRITICAL", limit=10)
+    
     for eachCVE in r:
-        print(eachCVE.cve)
+        print(eachCVE.v3severity + ' - ' + str(eachCVE.v3score))
+        print(eachCVE.cve.description.description_data[0].value)
         
 
 def banner(ip, port):
-    #print(ip, port)
     ns = nmap.PortScanner()
     for ports in port:
-        #print(ports, type(ports))
         dic = ns.scan(str(ip), str(ports))
         res = json.dumps(dic)
         jres = json.loads(res)
@@ -187,21 +177,7 @@ def banner(ip, port):
         print(product + " " + version)
         nvd_search(product)
 
-    # for ports in port:
-    #     s = socket.socket()
-    #     s.connect((ip, ports))
-    #     s.settimeout(2)
-    #     try:
-    #         print(s.recv(1024))
-    #     except:
-    #         print("No banner found for port " + str(ports))
-
-
-
-# handle()
 choose_ip()
 run_scanner_port(800, 3)
-#TARGET_IP="178.33.235.93"
-#OPEN_PORTS=[20, 21, 22, 23, 25, 53, 80, 110, 389, 443, 3389]
 banner(TARGET_IP, OPEN_PORTS)
 
